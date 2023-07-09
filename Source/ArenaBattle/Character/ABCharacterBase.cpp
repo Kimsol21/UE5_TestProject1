@@ -2,13 +2,52 @@
 
 
 #include "Character/ABCharacterBase.h"
+#include "Components/CapsuleComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
 {
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
+	
+	// 캐릭터 카메라 관련 세팅값
+	bUseControllerRotationPitch = false;
+	bUseControllerRotationRoll = false;
+	bUseControllerRotationYaw = false;
 
+	// Capsule Component
+	GetCapsuleComponent()->InitCapsuleSize(35.0f, 90.0f);
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
+
+	// SkeletalMesh Component 
+	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
+	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
+	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
+
+	// CharacterMovement Component
+	GetCharacterMovement()->bOrientRotationToMovement = true; //이동할때 그쪽방향으로 회전을 시킬거냐
+	GetCharacterMovement()->RotationRate = FRotator(0.0f, 500.0f, 0.0f);// 한번에 바뀌는 각도
+	GetCharacterMovement()->JumpZVelocity = 500.0f;
+	GetCharacterMovement()->AirControl = 0.35f;//공중에서 이동할때의 값
+	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
+	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
+	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;//이동하다가 멈출때 제동을 어떤식으로 할껀가
+
+	// 메쉬 적용
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple'"));
+	if (CharacterMeshRef.Object)
+	{
+		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
+	}
+
+	//애니메이션 적용
+	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnimRef(TEXT("/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple_C"));
+	if (CharacterAnimRef.Class)
+	{
+		GetMesh()->SetAnimInstanceClass(CharacterAnimRef.Class);
+	}
+	
 }
 
 // Called when the game starts or when spawned

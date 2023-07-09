@@ -15,5 +15,4 @@ class ARENABATTLE_API AABGameModeBase : public AGameModeBase
 	GENERATED_BODY()
 
 	AABGameModeBase();
-	
 };
