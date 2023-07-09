@@ -73,11 +73,5 @@ Plugins/*/Intermediate/*
 # Cache files for the editor to use
 DerivedDataCache/*
 
-# My Ignore
-ArenaBattle/DerivedDataCache/*
-ArenaBattle/Intermediate/*
-ArenaBattle/Binaries/*
 
-TestMap/DerivedDataCache/*
-TestMap/Intermediate/*
-TestMap/Binaries/*
+
