@@ -4,10 +4,11 @@
 
 #include "CoreMinimal.h"
 #include "Character/ABCharacterBase.h"
+#include "InputActionValue.h"
 #include "ABCharacterPlayer.generated.h"
 
 /**
- * 
+ *
  */
 UCLASS()
 class ARENABATTLE_API AABCharacterPlayer : public AABCharacterBase
@@ -16,11 +17,32 @@ class ARENABATTLE_API AABCharacterPlayer : public AABCharacterBase
 
 public:
 	AABCharacterPlayer();
-	
-protected:
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, category = Camera)
-	TObjectPtr<class USpringArmComponent> CameraBoom;
 
-	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, category = Camera)
-	TObjectPtr<class UCameraComponent> Camera;
+protected:
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class USpringArmComponent> CameraBoom;
+
+	UPROPERTY(VisibleAnywhere, BlueprintReadOnly, Category = Camera, Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UCameraComponent> Camera;
+
+
+	//Input Section
+protected:
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UInputMappingContext> DefaultMappingContext;//늘리고싶으면 아래에 또하나 만들면됌.
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UInputAction> JumpAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UInputAction> MoveAction;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input, Meta = (AllowPrivateAccess = "true"))
+		TObjectPtr<class UInputAction> LookAction;
+
+	void Move(const FInputActionValue& Value);
+	void Look(const FInputActionValue& Value);
+
+public:
+	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 };
