@@ -46,15 +46,16 @@ AABCharacterPlayer::AABCharacterPlayer()
 		LookAction = InputActionLookRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionLookRef(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/IA_ChangeControl.IA_ChangeControl'"));
-	if (InputActionLookRef.Object)
+	static ConstructorHelpers::FObjectFinder<UInputAction> ChangeControlActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/IA_ChangeControl.IA_ChangeControl'"));
+	if (ChangeControlActionRef.Object)
 	{
-		ChangeControlAction = InputActionLookRef.Object;
+		ChangeControlAction = ChangeControlActionRef.Object;
 	}
 }
 
 void AABCharacterPlayer::BeginPlay()
 {
+	Super::BeginPlay();
 
 	APlayerController* PlayerControlller = CastChecked<APlayerController>(GetController());
 	if (UEnhancedInputLocalPlayerSubsystem* Subsystem = ULocalPlayer::GetSubsystem<UEnhancedInputLocalPlayerSubsystem>(PlayerControlller->GetLocalPlayer()))
@@ -82,7 +83,7 @@ void AABCharacterPlayer::Look(const FInputActionValue& Value)
 	FVector2D LookAxisVector = Value.Get<FVector2D>();
 
 	AddControllerYawInput(LookAxisVector.X);
-	AddControllerYawInput(LookAxisVector.Y);
+	AddControllerPitchInput(LookAxisVector.Y);
 }
 
 void AABCharacterPlayer::ChangeControl()
