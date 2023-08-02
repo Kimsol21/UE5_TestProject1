@@ -26,4 +26,10 @@ public:
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
 
+protected:
+	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
+	TMap<ECharacterControlType, class UABCharacterControlDataAsset*> CharacterControlManager;
+
+	virtual void SetCharacterContorolData(const UABCharacterControlDataAsset* CharacterControlData);
+
 };

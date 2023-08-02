@@ -4,6 +4,8 @@
 #include "Character/ABCharacterBase.h"
 #include "Components/CapsuleComponent.h"
 #include "GameFramework/CharacterMovementComponent.h"
+#include "InputMappingContext.h"
+#include "Character/ABCharacterControlDataAsset.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -11,6 +13,35 @@ AABCharacterBase::AABCharacterBase()
  	// Set this character to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
 	PrimaryActorTick.bCanEverTick = true;
 	
+	//CharacterControlData
+	static ConstructorHelpers::FObjectFinder<UABCharacterControlDataAsset> ShoulderDataRef(TEXT("/Script/ArenaBattle.ABCharacterControlDataAsset'/Game/ArenaBattle/CharacterControl/DA_Shoulder.DA_Shoulder'"));
+	if (ShoulderDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::Shoulder, ShoulderDataRef.Object);
+	}
+
+	static ConstructorHelpers::FObjectFinder<UABCharacterControlDataAsset> QuaterDataRef(TEXT("/Script/ArenaBattle.ABCharacterControlDataAsset'/Game/ArenaBattle/CharacterControl/DA_Quater.DA_Quater'"));
+	if (QuaterDataRef.Object)
+	{
+		CharacterControlManager.Add(ECharacterControlType::Quater, QuaterDataRef.Object);
+	}
+
+	// 메쉬 적용
+	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/InfinityBladeWarriors/Character/CompleteCharacters/SK_CharM_Ram.SK_CharM_Ram'"));
+	if (CharacterMeshRef.Object)
+	{
+		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
+	}
+
+	//애니메이션 적용
+	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnimRef(TEXT("/Game/ArenaBattle/Animation/ABP_Player.ABP_Player_C"));
+	if (CharacterAnimRef.Class)
+	{
+		GetMesh()->SetAnimInstanceClass(CharacterAnimRef.Class);
+	}
+
+
+
 	// 캐릭터 카메라 관련 세팅값
 	bUseControllerRotationPitch = false;
 	bUseControllerRotationRoll = false;
@@ -34,19 +65,13 @@ AABCharacterBase::AABCharacterBase()
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;//이동하다가 멈출때 제동을 어떤식으로 할껀가
 
-	// 메쉬 적용
-	static ConstructorHelpers::FObjectFinder<USkeletalMesh> CharacterMeshRef(TEXT("/Script/Engine.SkeletalMesh'/Game/Characters/Mannequins/Meshes/SKM_Quinn_Simple.SKM_Quinn_Simple'"));
-	if (CharacterMeshRef.Object)
-	{
-		GetMesh()->SetSkeletalMesh(CharacterMeshRef.Object);
-	}
+	
 
-	//애니메이션 적용
-	static ConstructorHelpers::FClassFinder<UAnimInstance> CharacterAnimRef(TEXT("/Game/Characters/Mannequins/Animations/ABP_Quinn.ABP_Quinn_C"));
-	if (CharacterAnimRef.Class)
-	{
-		GetMesh()->SetAnimInstanceClass(CharacterAnimRef.Class);
-	}
+
+
+	
+
+	
 	
 }
 
@@ -54,6 +79,19 @@ AABCharacterBase::AABCharacterBase()
 void AABCharacterBase::SetupPlayerInputComponent(UInputComponent* PlayerInputComponent)
 {
 	Super::SetupPlayerInputComponent(PlayerInputComponent);
+
+}
+
+void AABCharacterBase::SetCharacterContorolData(const UABCharacterControlDataAsset* CharacterControlData)
+{
+
+	bUseControllerRotationPitch = CharacterControlData->bUseControlRotationPitch;
+	bUseControllerRotationRoll = CharacterControlData->bUseControlRotationRoll;
+	bUseControllerRotationYaw = CharacterControlData->bUseControlRotationYaw;
+
+	GetCharacterMovement()->bUseControllerDesiredRotation = CharacterControlData->bUseControllerDesiredRotation;
+	GetCharacterMovement()->bOrientRotationToMovement = CharacterControlData->bOrientRotationToMovement; //이동할때 그쪽방향으로 회전을 시킬거냐
+	GetCharacterMovement()->RotationRate = CharacterControlData->RotationRate;// 한번에 바뀌는 각도
 
 }
 

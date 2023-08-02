@@ -30,13 +30,21 @@ public:
 	FRotator RotationRate;
 
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
-	uint32 bUseControlDesiredRotation : 1;//서서히 바뀌도록
+	uint32 bUseControllerDesiredRotation : 1;//서서히 바뀌도록
 
 	UPROPERTY(EditAnywhere, Category = CharacterMovement)
-	uint32 bOrientRotationMovement: 1;//그쪽 방향을 바라보도록
+	uint32 bOrientRotationToMovement : 1;//그쪽 방향을 바라보도록
+
+
+
+
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Input)
 	TObjectPtr<class UInputMappingContext> InputMappingContext;
+
+
+
+
 
 	//Sprint arm Section
 	UPROPERTY(EditAnywhere, Category = SpringArm)
@@ -50,6 +58,15 @@ public:
 
 	UPROPERTY(EditAnywhere, Category = SpringArm)
 	uint32 bDoCollisionTest: 1;
+
+	UPROPERTY(EditAnywhere, Category = SpringArm)
+	uint32 bInheritYaw : 1;
+
+	UPROPERTY(EditAnywhere, Category = SpringArm)
+	uint32 bInheritPitch : 1;
+
+	UPROPERTY(EditAnywhere, Category = SpringArm)
+	uint32 bInheritRoll : 1;
 
 
 	
