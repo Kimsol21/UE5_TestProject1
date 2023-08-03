@@ -12,8 +12,7 @@
 
 AABCharacterPlayer::AABCharacterPlayer()
 {
-	GetCharacterMovement()->MaxAcceleration = 200.0f;
-
+	//GetCharacterMovement()->MaxAcceleration = 200.0f;
 
 	// Camera
 	CameraBoom = CreateDefaultSubobject<USpringArmComponent>(TEXT("CameraBoom"));
@@ -24,13 +23,6 @@ AABCharacterPlayer::AABCharacterPlayer()
 	Camera = CreateDefaultSubobject<UCameraComponent>(TEXT("Camera"));
 	Camera->SetupAttachment(CameraBoom, USpringArmComponent::SocketName);
 	Camera->bUsePawnControlRotation = false;
-
-	//Input
-	//static ConstructorHelpers::FObjectFinder<UInputMappingContext> InputMappingContextRef(TEXT("/Script/EnhancedInput.InputMappingContext'/Game/ArenaBattle/Input/IMC_Default.IMC_Default'"));
-	//if (InputMappingContextRef.Object)
-	//{
-	//	DefaultMappingContext = InputMappingContextRef.Object;
-	//}
 
 	static ConstructorHelpers::FObjectFinder<UInputAction> InputActionJumpRef(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/IA_Jump.IA_Jump'"));
 	if (InputActionJumpRef.Object)
@@ -62,6 +54,13 @@ AABCharacterPlayer::AABCharacterPlayer()
 	{
 		ChangeControlAction = ChangeControlActionRef.Object;
 	}
+
+	static ConstructorHelpers::FObjectFinder<UInputAction> AttackActionRef(TEXT("/Script/EnhancedInput.InputAction'/Game/ArenaBattle/Input/IA_Attack.IA_Attack'"));
+	if (AttackActionRef.Object)
+	{
+		AttackAction = AttackActionRef.Object;
+	}
+
 
 	CurrentCharacterControlType = ECharacterControlType::Quater;
 }
@@ -151,6 +150,13 @@ void AABCharacterPlayer::SetCharacterControl(ECharacterControlType NewCharacterC
 	CurrentCharacterControlType = NewCharacterControlType;
 }
 
+void AABCharacterPlayer::Attack()
+{
+	Super::ProccessComboAttack();
+
+
+}
+
 void AABCharacterPlayer::SetCharacterContorolData(const UABCharacterControlDataAsset* CharacterControlData)
 {
 	Super::SetCharacterContorolData(CharacterControlData);
@@ -184,4 +190,5 @@ void AABCharacterPlayer::SetupPlayerInputComponent(UInputComponent* PlayerInputC
 	EnhancedInputComponent->BindAction(ShoulderLookAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::ShoulderLook);
 
 	EnhancedInputComponent->BindAction(ChangeControlAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::ChangeControl);
+	EnhancedInputComponent->BindAction(AttackAction, ETriggerEvent::Triggered, this, &AABCharacterPlayer::Attack);
 }

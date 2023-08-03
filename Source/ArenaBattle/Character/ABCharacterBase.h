@@ -32,4 +32,23 @@ protected:
 
 	virtual void SetCharacterContorolData(const UABCharacterControlDataAsset* CharacterControlData);
 
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
+	TObjectPtr<class UAnimMontage> ComboActionMontage;
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AttackData, Meta = (AllowPrivateAccess = "true"))
+	TObjectPtr<class UABComboActionData> ComboActionData;
+
+	void ProccessComboAttack();
+
+	void ComboActionBegin();
+	void ComboActionEnd(UAnimMontage* TargetMontage, bool IsEnded);
+
+	int32 CurrentCombo = 0;
+
+	FTimerHandle ComboTimerHandle;
+	bool HasNextComboCommand = false; //에디터에서 사용할지 여부에 따라 :1 bool타입 여부 결정.
+
+	void SetComboTimerChecker();
+	void ComboCheck();
+
 };
