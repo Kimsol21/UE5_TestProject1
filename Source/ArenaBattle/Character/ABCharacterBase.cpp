@@ -7,6 +7,8 @@
 #include "InputMappingContext.h"
 #include "Character/ABCharacterControlDataAsset.h"
 #include "Character/ABComboActionData.h"
+//#include "Engine/EngineTypes.h"
+#include "Engine/DamageEvents.h"
 
 // Sets default values
 AABCharacterBase::AABCharacterBase()
@@ -48,6 +50,12 @@ AABCharacterBase::AABCharacterBase()
 		ComboActionMontage = ComboAttackAnimMontageRef.Object;
 	}
 
+	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadAnimMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/ArenaBattle/Animation/AM_Hit.AM_Hit'"));
+	if (DeadAnimMontageRef.Object)
+	{
+		DeadMontage = DeadAnimMontageRef.Object;
+	}
+
 
 
 	// 캐릭터 카메라 관련 세팅값
@@ -57,12 +65,12 @@ AABCharacterBase::AABCharacterBase()
 
 	// Capsule Component
 	GetCapsuleComponent()->InitCapsuleSize(35.0f, 90.0f);
-	GetCapsuleComponent()->SetCollisionProfileName(TEXT("Pawn"));
+	GetCapsuleComponent()->SetCollisionProfileName(TEXT("ABCapsule"));
 
 	// SkeletalMesh Component 
 	GetMesh()->SetRelativeLocationAndRotation(FVector(0.0f, 0.0f, -90.0f), FRotator(0.0f, -90.0f, 0.0f));
 	GetMesh()->SetAnimationMode(EAnimationMode::AnimationBlueprint);
-	GetMesh()->SetCollisionProfileName(TEXT("CharacterMesh"));
+	GetMesh()->SetCollisionProfileName(TEXT("NoCollision"));
 
 	// CharacterMovement Component
 	GetCharacterMovement()->bOrientRotationToMovement = true; //이동할때 그쪽방향으로 회전을 시킬거냐
@@ -72,13 +80,6 @@ AABCharacterBase::AABCharacterBase()
 	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;//이동하다가 멈출때 제동을 어떤식으로 할껀가
-
-	
-
-
-
-	
-
 	
 	
 }
@@ -185,5 +186,63 @@ void AABCharacterBase::ComboCheck()
 		SetComboTimerChecker();
 		HasNextComboCommand = false;
 	}
+}
+
+void AABCharacterBase::SetDead()
+{
+	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+	AnimInstance->StopAllMontages(0.0f);
+	AnimInstance->Montage_Play(DeadMontage);
+
+	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+}
+
+void AABCharacterBase::AttackHitCheck()
+{
+	FHitResult OutHitResult;
+	FCollisionQueryParams Params(SCENE_QUERY_STAT(Attack), false, this);
+
+	const float AttackRange = 300.0f;
+	const float Radius = 50.0f;
+
+	const FVector Start = GetActorLocation() + GetActorForwardVector() * GetCapsuleComponent()->GetScaledCapsuleRadius();
+	const FVector End = Start + GetActorForwardVector() * AttackRange;
+
+	const float TempAttackPower = 100.0f;
+
+
+	bool bIsHit = GetWorld()->SweepSingleByChannel(OutHitResult, Start, End, FQuat::Identity, ECC_GameTraceChannel3, FCollisionShape::MakeSphere(Radius), Params);
+
+	if (bIsHit)
+	{
+		FDamageEvent DamageEvent;
+		OutHitResult.GetActor()->TakeDamage(TempAttackPower, DamageEvent, GetController(), this);
+	}
+
+#if ENABLE_DRAW_DEBUG
+
+	//FVector CapsulePosition = Start + GetActorForwardVector() * AttackRange * 0.5;
+
+	FVector CapsulePosition = Start + (End - Start)*0.5;
+	float HalfHeight = AttackRange * 0.5f+ Radius;
+
+
+	FQuat CapsuleRot = FRotationMatrix::MakeFromZ(GetActorForwardVector()).ToQuat();
+
+	FColor Color = bIsHit ? FColor::Green : FColor::Red;
+
+	float DebugLifeTime = 3.0f;
+
+	DrawDebugCapsule(GetWorld(), CapsulePosition, HalfHeight, Radius, CapsuleRot, Color, false, DebugLifeTime);
+#endif
+}
+
+float AABCharacterBase::TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser)
+{
+	float FinalDamage = Super::TakeDamage(Damage, DamageEvent, EventInstigator, DamageCauser);
+
+	SetDead();
+
+	return FinalDamage;
 }
 
