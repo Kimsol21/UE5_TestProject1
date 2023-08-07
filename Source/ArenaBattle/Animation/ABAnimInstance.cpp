@@ -9,7 +9,10 @@ UABAnimInstance::UABAnimInstance()
 {
 	MoveThreshould = 3.0f;
 	JumpThreshould = 0.1f;
+	bIsDead = false;
 }
+
+
 
 void UABAnimInstance::NativeInitializeAnimation()
 {
@@ -20,6 +23,7 @@ void UABAnimInstance::NativeInitializeAnimation()
 	{
 		Movement = Owner->GetCharacterMovement();
 	}
+
 }
 
 void UABAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
@@ -36,3 +40,4 @@ void UABAnimInstance::NativeUpdateAnimation(float DeltaSeconds)
 		bIsJumping = bIsFalling & (Velocity.Z > JumpThreshould);
 	}
 }
+

@@ -3,25 +3,35 @@
 
 #include "Game/ABGameModeBase.h"
 
+const uint8 AABGameModeBase::GOAL_OF_KILL(5);
+
 AABGameModeBase::AABGameModeBase()
 {
-	// Default Pawn Class
-	/*static ConstructorHelpers::FClassFinder<APawn> ThirdPersonClassRef(TEXT("/Game/ThirdPerson/Blueprints/BP_ThirdPersonCharacter.BP_ThirdPersonCharacter_C"));
-	if (ThirdPersonClassRef.Class)
-	{
-		DefaultPawnClass = ThirdPersonClassRef.Class;
-	}*/
+	//Init Member Variable
+	TotalKillNum = 0;
 
+
+	//Load & Apply Class Info
 	static ConstructorHelpers::FClassFinder<APawn> DefaultPawnClassRef(TEXT("/Game/ArenaBattle/Character/BP_Player.BP_Player_C"));
 	if (DefaultPawnClassRef.Class)
 	{
 		DefaultPawnClass = DefaultPawnClassRef.Class;
 	}
 
-	// Player Controller
 	static ConstructorHelpers::FClassFinder<APlayerController> PlayerControllerClassRef(TEXT("/Script/ArenaBattle.ABPlayerController"));
 	if (PlayerControllerClassRef.Class)
 	{
 		PlayerControllerClass = PlayerControllerClassRef.Class;
+	}
+}
+
+void AABGameModeBase::IncreaseKillNum(uint8 _NewKill)
+{
+	TotalKillNum += _NewKill;
+
+	if (GOAL_OF_KILL <= TotalKillNum)
+	{
+		KillGameOverEvent.Broadcast();
+		UE_LOG(LogTemp, Error, TEXT("Game Clear!!@@@@@@@@@@@@@@@@@"));
 	}
 }

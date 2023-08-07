@@ -4,6 +4,7 @@
 #include "Animation/AnimInstance.h"
 #include "ABAnimInstance.generated.h"
 
+
 UCLASS()
 class ARENABATTLE_API UABAnimInstance : public UAnimInstance
 {
@@ -11,6 +12,8 @@ class ARENABATTLE_API UABAnimInstance : public UAnimInstance
 
 public:
 	UABAnimInstance();
+
+	void SetbIsDeadTrue() { bIsDead = true; };
 
 protected:
 	virtual void NativeInitializeAnimation() override;
@@ -32,6 +35,9 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	uint32 bIsFalling : 1;
+
+	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
+	uint32 bIsDead : 1;
 		
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
@@ -46,5 +52,6 @@ protected:
 
 	UPROPERTY(EditAnywhere, BlueprintReadOnly, Category = Character)
 	float MoveThreshould;
+
 	
 };

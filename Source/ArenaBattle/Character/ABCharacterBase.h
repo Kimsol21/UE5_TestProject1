@@ -7,6 +7,7 @@
 #include "Character/ABAnimationAttackInterface.h"
 #include "ABCharacterBase.generated.h"
 
+DECLARE_EVENT_OneParam(AABCharacterBase, FOnCharacterDeadEvent, AABCharacterBase*)
 
 UENUM()
 enum class ECharacterControlType : uint8
@@ -27,18 +28,17 @@ public:
 public:	
 	// Called to bind functionality to input
 	virtual void SetupPlayerInputComponent(class UInputComponent* PlayerInputComponent) override;
+	FOnCharacterDeadEvent OnCharacterDeadEvent;
 
 protected:
 	UPROPERTY(EditAnywhere, Category = CharacterControl, Meta = (AllowPrivateAccess = "true"))
 	TMap<ECharacterControlType, class UABCharacterControlDataAsset*> CharacterControlManager;
 
 	virtual void SetCharacterContorolData(const UABCharacterControlDataAsset* CharacterControlData);
+	virtual void PostInitializeComponents() override;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
 	TObjectPtr<class UAnimMontage> ComboActionMontage;
-
-	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = Animation)
-	TObjectPtr<class UAnimMontage> DeadMontage;
 
 	UPROPERTY(EditAnywhere, BlueprintReadWrite, Category = AttackData, Meta = (AllowPrivateAccess = "true"))
 	TObjectPtr<class UABComboActionData> ComboActionData;
@@ -51,12 +51,15 @@ protected:
 	int32 CurrentCombo = 0;
 
 	FTimerHandle ComboTimerHandle;
+	FTimerHandle DeadAnimEndHandle;
+
 	bool HasNextComboCommand = false; //에디터에서 사용할지 여부에 따라 :1 bool타입 여부 결정.
 
 	void SetComboTimerChecker();
 	void ComboCheck();
 
 	void SetDead();
+	void DeadAnimEnd();
 
 	virtual void AttackHitCheck() override;
 	virtual float TakeDamage(float Damage, FDamageEvent const& DamageEvent, AController* EventInstigator, AActor* DamageCauser) override;

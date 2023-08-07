@@ -7,7 +7,7 @@
 #include "InputMappingContext.h"
 #include "Character/ABCharacterControlDataAsset.h"
 #include "Character/ABComboActionData.h"
-//#include "Engine/EngineTypes.h"
+#include "Animation/ABAnimInstance.h"
 #include "Engine/DamageEvents.h"
 
 // Sets default values
@@ -50,13 +50,6 @@ AABCharacterBase::AABCharacterBase()
 		ComboActionMontage = ComboAttackAnimMontageRef.Object;
 	}
 
-	static ConstructorHelpers::FObjectFinder<UAnimMontage> DeadAnimMontageRef(TEXT("/Script/Engine.AnimMontage'/Game/ArenaBattle/Animation/AM_Hit.AM_Hit'"));
-	if (DeadAnimMontageRef.Object)
-	{
-		DeadMontage = DeadAnimMontageRef.Object;
-	}
-
-
 
 	// 캐릭터 카메라 관련 세팅값
 	bUseControllerRotationPitch = false;
@@ -80,8 +73,6 @@ AABCharacterBase::AABCharacterBase()
 	GetCharacterMovement()->MaxWalkSpeed = 500.0f;
 	GetCharacterMovement()->MinAnalogWalkSpeed = 20.0f;
 	GetCharacterMovement()->BrakingDecelerationWalking = 2000.0f;//이동하다가 멈출때 제동을 어떤식으로 할껀가
-	
-	
 }
 
 // Called to bind functionality to input
@@ -104,17 +95,20 @@ void AABCharacterBase::SetCharacterContorolData(const UABCharacterControlDataAss
 
 }
 
+void AABCharacterBase::PostInitializeComponents()
+{
+	Super::PostInitializeComponents();
+
+}
+
 void AABCharacterBase::ProccessComboAttack()
 {
-	
-
 	if (0 == CurrentCombo)
 	{
 		ComboActionBegin();
 		return;
 	}
 	
-
 	//다음 입력이 들어왔는지
 	if (!ComboTimerHandle.IsValid())
 	{
@@ -134,7 +128,7 @@ void AABCharacterBase::ComboActionBegin()
 
 	const float AttackSpeedRate = 1.0f;
 
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
+    UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
 	AnimInstance->Montage_Play(ComboActionMontage, AttackSpeedRate);
 
 	FOnMontageEnded MontageEndDelegate;
@@ -150,6 +144,7 @@ void AABCharacterBase::ComboActionEnd(UAnimMontage* TargetMontage, bool IsEnded)
 	CurrentCombo = 0;
 
 	GetCharacterMovement()->SetMovementMode(EMovementMode::MOVE_Walking);
+
 }
 
 void AABCharacterBase::SetComboTimerChecker()
@@ -190,11 +185,19 @@ void AABCharacterBase::ComboCheck()
 
 void AABCharacterBase::SetDead()
 {
-	UAnimInstance* AnimInstance = GetMesh()->GetAnimInstance();
-	AnimInstance->StopAllMontages(0.0f);
-	AnimInstance->Montage_Play(DeadMontage);
+	UABAnimInstance* AnimInstance = Cast<UABAnimInstance>(GetMesh()->GetAnimInstance());
+	AnimInstance->SetbIsDeadTrue();
 
-	GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetWorld()->GetTimerManager().SetTimer(DeadAnimEndHandle, this, &AABCharacterBase::DeadAnimEnd, 35.0f/30.0f, false);
+
+	//GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
+	GetCapsuleComponent()->SetCollisionProfileName("NoCollision");
+}
+
+void AABCharacterBase::DeadAnimEnd()
+{
+	OnCharacterDeadEvent.Broadcast(this);
+	Destroy();
 }
 
 void AABCharacterBase::AttackHitCheck()
@@ -220,8 +223,6 @@ void AABCharacterBase::AttackHitCheck()
 	}
 
 #if ENABLE_DRAW_DEBUG
-
-	//FVector CapsulePosition = Start + GetActorForwardVector() * AttackRange * 0.5;
 
 	FVector CapsulePosition = Start + (End - Start)*0.5;
 	float HalfHeight = AttackRange * 0.5f+ Radius;
